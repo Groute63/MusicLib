@@ -2,21 +2,18 @@ package com.company.storage.dao;
 
 import com.company.entityClass.Song;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.util.Map;
+import java.util.UUID;
 
 public interface SongDao {
-    void saveSongs(String fileName,Song ... song) throws FileNotFoundException;
 
-    void loadSongs(String fileName) throws IOException;
+    Song getSongById(UUID id);
 
-    Song getSongById(int id);
-
-    Song[] getAllSongs();
+    Map<UUID,Song> getAllSongs();
 
     void addSongs(Song ... song);
 
-    void deleteSongById(int id);
+    void deleteSongById(UUID id);
 
-    void renameSongById(int id, String newName);
+    void renameSongById(UUID id, String newName);
 }

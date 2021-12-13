@@ -2,26 +2,29 @@ package com.company.storage.dao;
 
 import com.company.entityClass.Album;
 import com.company.entityClass.Artist;
+import com.company.entityClass.Song;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public interface ArtistDao {
-    void saveArtist(String fileName, Artist... artists) throws FileNotFoundException;
 
-    void loadArtist(String fileName) throws IOException;
-
-    Artist getArtistById(int id);
+    Artist getArtistById(UUID id);
 
     void addArtist(Artist... artists);
 
-    Artist[] getAllArtist();
+    Map<UUID, Artist> getAllArtist();
 
-    void deleteArtistById(int id);
+    void deleteArtistById(UUID id);
 
-    void renameArtistById(int id, String newName);
+    void renameArtistById(UUID id, String newName);
 
-    void addNewSongsCollections(int ArtistId, Album... albums);
+    void addNewSongsCollections(UUID ArtistId, Album... albums);
 
-    void deleteSongsCollectionsById(int artistId, int albumId);
+    void deleteAlbumById(UUID artistId, int albumPos);
+
+    Album  getAlbumById(UUID artistId, int albumPos);
+
+    List<Song> getAllSongInAlbumById(UUID artistId, int albumPos);
 }

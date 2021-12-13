@@ -5,23 +5,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class Artist implements Serializable {
+public class Artist implements Serializable,EntityClassMarker {
     private String name;
     private List<Album> albums;
-    private int id;
+
 
     public Artist(String name, Album... albums) {
         this.name = name;
         this.albums = new ArrayList<>(albums.length);
         Collections.addAll(this.albums, albums);
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 
     public String toString() {
@@ -70,11 +62,4 @@ public class Artist implements Serializable {
         return songs;
     }
 
-    public void deleteAlbum(int id) {
-        for (int i = 0; i < albums.size(); i++)
-            if (albums.get(i).getId() == id) {
-                albums.remove(i);
-                break;
-            }
-    }
 }

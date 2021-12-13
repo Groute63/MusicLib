@@ -1,5 +1,5 @@
 package com.company.entityClass;
 
-public enum EnumAlbum {
+public enum AlbumType {
     PLAYLIST,ALBUM
 }

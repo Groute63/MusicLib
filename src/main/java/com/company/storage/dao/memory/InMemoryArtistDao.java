@@ -2,95 +2,63 @@ package com.company.storage.dao.memory;
 
 import com.company.entityClass.Album;
 import com.company.entityClass.Artist;
+import com.company.entityClass.Song;
 import com.company.storage.dao.ArtistDao;
-import com.google.gson.Gson;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
 
 public class InMemoryArtistDao implements ArtistDao {
-    private final List<Artist> artistList = new ArrayList();
-    private int currentId = 0;
+    private final Map<UUID, Artist> artistMap = new HashMap<>();
 
     @Override
-    public void saveArtist(String fileName, Artist... artists) throws FileNotFoundException {
-        Gson gson = new Gson();
-        PrintWriter printWriter = new PrintWriter(fileName);
-        for (int i = 0; i < artists.length; i++) {
-            String json = gson.toJson(artists[i]);
-            printWriter.println(json);
-        }
-        printWriter.flush();
-    }
-
-    @Override
-    public void loadArtist(String fileName) throws IOException {
-        Gson gson = new Gson();
-        String[] arr = Files.readAllLines(Paths.get(fileName)).toArray(new String[0]);
-        for (int i = 0; i < arr.length; i++) {
-            artistList.add(gson.fromJson(arr[i], Artist.class));
-        }
-    }
-
-    @Override
-    public Artist getArtistById(int id) {
-        for (int i = 0; i < artistList.size(); i++)
-            if (artistList.get(i).getId() == id)
-                return artistList.get(i);
-        return null;
+    public Artist getArtistById(UUID id) {
+        return artistMap.get(id);
     }
 
     @Override
     public void addArtist(Artist... artists) {
-        for (int i = 0; i < artists.length; i++) {
-            artists[i].setId(currentId);
-            currentId++;
-            artistList.add(artists[i]);
+        for (Artist artist : artists) {
+            artistMap.put(UUID.randomUUID(), artist);
         }
     }
 
     @Override
-    public Artist[] getAllArtist() {
-        return artistList.toArray(new Artist[0]);
+    public Map<UUID, Artist> getAllArtist() {
+        return artistMap;
     }
 
     @Override
-    public void deleteArtistById(int id) {
-        for (int i = 0; i < artistList.size(); i++)
-            if (artistList.get(i).getId() == id) {
-                artistList.remove(i);
-                break;
-            }
+    public void deleteArtistById(UUID id) {
+        artistMap.remove(id);
     }
 
     @Override
-    public void renameArtistById(int id, String newName) {
-        for (int i = 0; i < artistList.size(); i++)
-            if (artistList.get(i).getId() == id) {
-                artistList.get(i).setName(newName);
-                break;
-            }
+    public void renameArtistById(UUID id, String newName) {
+        artistMap.get(id).setName(newName);
     }
 
     @Override
-    public void addNewSongsCollections(int ArtistId, Album... albums) {
-        for (int i = 0; i < artistList.size(); i++)
-            if (artistList.get(i).getId() == ArtistId) {
-                artistList.get(i).addAlbums(albums);
-                break;
-            }
+    public void addNewSongsCollections(UUID artistId, Album... albums) {
+        artistMap.get(artistId).addAlbums(albums);
     }
 
     @Override
-    public void deleteSongsCollectionsById(int artistId, int albumId) {
-        for (int i = 0; i < artistList.size(); i++)
-            if (artistList.get(i).getId() == artistId) {
-                artistList.get(i).deleteAlbum(albumId);
-            }
+    public Album getAlbumById(UUID artistId, int albumPos) {
+        return artistMap.get(artistId).getAlbums().get(albumPos);
     }
+
+    @Override
+    public List<Song> getAllSongInAlbumById(UUID artistId, int albumPos) {
+       return artistMap.get(artistId).getAlbums().get(albumPos).getSongs();
+    }
+
+    @Override
+    public void deleteAlbumById(UUID artistId, int albumPos) {
+        artistMap.get(artistId).getAlbums().remove(albumPos);
+    }
+
 }

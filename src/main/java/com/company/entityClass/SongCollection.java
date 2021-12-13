@@ -4,25 +4,16 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public abstract class SongCollection {
+public abstract class SongCollection implements EntityClassMarker {
     private String name;
     private List<Song> songs;
-    private int id;
 
-    public abstract EnumAlbum getType();
+    public abstract AlbumType getType();
 
     public SongCollection(String name, Song... songs) {
         this.name = name;
         this.songs = new ArrayList<>(songs.length);
         Collections.addAll(this.songs, songs);
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 
     public String toString() {
@@ -69,13 +60,5 @@ public abstract class SongCollection {
 
     public void addSongs(Song... song) {
         Collections.addAll(songs, song);
-    }
-
-    public void deleteSong(int id) {
-        for (int i = 0; i < songs.size(); i++)
-            if (songs.get(i).getId() == id) {
-                songs.remove(i);
-                break;
-            }
     }
 }
