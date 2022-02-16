@@ -1,74 +1,102 @@
 package com.company.storage;
 
-import com.company.entityClass.Album;
-import com.company.entityClass.Artist;
-import com.company.entityClass.EntityClassMarker;
-import com.company.entityClass.Song;
+import com.company.entityclass.Album;
+import com.company.entityclass.Artist;
+import com.company.entityclass.EntityClassMarker;
+import com.company.entityclass.Song;
 import com.company.storage.dao.ArtistDao;
 import com.company.storage.dao.AlbumDao;
 import com.company.storage.dao.SongDao;
 import com.company.storage.dao.memory.InMemoryArtistDao;
 import com.company.storage.dao.memory.InMemoryAlbumDao;
 import com.company.storage.dao.memory.InMemorySongDao;
-import com.google.gson.Gson;
+import com.google.gson.*;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.UUID;
+import java.util.*;
 
 public class InMemoryStorage implements Storage {
     private final SongDao songs = new InMemorySongDao();
     private final AlbumDao albums = new InMemoryAlbumDao();
     private final ArtistDao artists = new InMemoryArtistDao();
+    private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-    public void save(String file,DaoType type) throws IOException {
-        Gson gson = new Gson();
+    public void save(String file, DaoType type, UUID... id) throws IOException {
         PrintWriter printWriter = new PrintWriter(file);
-        EntityClassMarker[] a = null;
+        List<EntityClassMarker> a = new ArrayList<>();
         switch (type) {
             case SONG: {
-                a = songs.getAllSongs().values().toArray(new Song[0]);
+                for (UUID uuid : id) {
+                    a.add(songs.getSongById(uuid));
+                }
                 break;
             }
             case ALBUM: {
-                a = albums.getAllAlbum().values().toArray(new Album[0]);
+                for (UUID uuid : id) {
+                    a.add(albums.getAlbumById(uuid));
+                }
                 break;
             }
             case ARTIST: {
-                a = artists.getAllArtist().values().toArray(new Artist[0]);
+                for (UUID uuid : id) {
+                    a.add(artists.getArtistById(uuid));
+                }
                 break;
             }
         }
-        for (int i = 0; i < a.length; i++) {
-                String json = gson.toJson(a[i]);
-                System.out.println(json);
-                printWriter.println(json);
-            }
+        String json = gson.toJson(a);
+        printWriter.println(json);
         printWriter.flush();
     }
 
-    public void load(String file,DaoType type) throws IOException {
-        Gson gson = new Gson();
-        EntityClassMarker[] a = null;
-        String[] arr = Files.readAllLines(Paths.get(file)).toArray(new String[0]);
+    public void load(String file, DaoType type) throws IOException {
+        List<String> arr = Files.readAllLines(Paths.get(file));
+        StringBuilder s = new StringBuilder();
+        for (String value : arr)
+            s.append(value);
         switch (type) {
             case SONG: {
-                for (int i = 0; i < arr.length; i++)
-                    songs.addSongs(gson.fromJson(arr[i], Song.class));
+                Song[] a = (gson.fromJson(s.toString(), Song[].class));
+                for (Song v : a)
+                    if (v.getId() == null)
+                        v.setId(UUID.randomUUID());
+                songs.addSongs(a);
                 break;
             }
             case ALBUM: {
-                for (int i = 0; i < arr.length; i++)
-                   albums.addAlbum(gson.fromJson(arr[i], Album.class));
+                Album[] a = (gson.fromJson(s.toString(), Album[].class));
+                for (Album v : a)
+                    if (v.getId() == null)
+                        v.setId(UUID.randomUUID());
+                albums.addAlbum(a);
                 break;
             }
             case ARTIST: {
-                for (int i = 0; i < arr.length; i++)
-                    artists.addArtist(gson.fromJson(arr[i], Artist.class));
+                Artist[] a = (gson.fromJson(s.toString(), Artist[].class));
+                for (Artist v : a)
+                    if (v.getId() == null)
+                        v.setId(UUID.randomUUID());
+                artists.addArtist(a);
                 break;
             }
         }
+    }
+
+    public Map<UUID, ?> get(DaoType type) {
+        switch (type) {
+            case SONG: {
+                return songs.getAllSongs();
+            }
+            case ALBUM: {
+                return albums.getAllAlbum();
+            }
+            case ARTIST: {
+                return artists.getAllArtist();
+            }
+        }
+        return null;
     }
 
     public void add(EntityClassMarker obj, DaoType type) {
@@ -88,14 +116,14 @@ public class InMemoryStorage implements Storage {
         }
     }
 
-    public void addIn(int pos, int pos2, DaoType type) {
+    public void addIn(UUID id, UUID id2, DaoType type) {
         switch (type) {
             case ALBUM: {
-                albums.getAlbumById(getUuid(pos,DaoType.ALBUM)).addSongs(songs.getSongById(getUuid(pos2,DaoType.SONG)));
+                albums.getAlbumById(id).addSongs(songs.getSongById(id2));
                 break;
             }
             case ARTIST: {
-                artists.getArtistById(getUuid(pos,DaoType.ARTIST)).addAlbums(albums.getAlbumById(getUuid(pos2,DaoType.ALBUM)));
+                artists.getArtistById(id).addAlbums(albums.getAlbumById(id2));
                 break;
             }
         }
@@ -104,79 +132,71 @@ public class InMemoryStorage implements Storage {
     public void printAll(DaoType type) {
         switch (type) {
             case SONG: {
-                Song[] a = songs.getAllSongs().values().toArray(new Song[0]);
-                for (int i = 0; i < a.length; i++)
-                    System.out.println(a[i]);
+                Collection<Song> a = songs.getAllSongs().values();
+                for (Song s : a)
+                    System.out.println(s);
                 break;
             }
             case ALBUM: {
-                Album[] a = albums.getAllAlbum().values().toArray(new Album[0]);
-                for (int i = 0; i < a.length; i++)
-                    System.out.println(a[i]);
+                Collection<Album> a = albums.getAllAlbum().values();
+                for (Album b : a)
+                    System.out.println(b);
                 break;
             }
             case ARTIST: {
-                Artist[] a = artists.getAllArtist().values().toArray(new Artist[0]);
-                for (int i = 0; i < a.length; i++)
-                    System.out.println(a[i]);
+                Collection<Artist> a = artists.getAllArtist().values();
+                for (Artist b : a)
+                    System.out.println(b);
                 break;
             }
         }
     }
 
     public void printName(DaoType type) {
+        int i = 0;
         switch (type) {
             case SONG: {
-                Song[] a = songs.getAllSongs().values().toArray(new Song[0]);
-                for (int i = 0; i < a.length; i++)
-                    System.out.println(i + " - " + a[i].getName());
+                Collection<Song> b = songs.getAllSongs().values();
+                for (Song a : b) {
+                    System.out.println(i + " - " + a.getName());
+                    i++;
+                }
                 break;
             }
             case ALBUM: {
-                Album[] a = albums.getAllAlbum().values().toArray(new Album[0]);
-                for (int i = 0; i < a.length; i++)
-                    System.out.println(i + " - " + a[i].getName());
+                Collection<Album> b = albums.getAllAlbum().values();
+                for (Album a : b) {
+                    System.out.println(i + " - " + a.getName());
+                    i++;
+                }
                 break;
             }
             case ARTIST: {
-                Artist[] a = artists.getAllArtist().values().toArray(new Artist[0]);
-                for (int i = 0; i < a.length; i++)
-                    System.out.println(i + " - " + a[i].getName());
+                Collection<Artist> b = artists.getAllArtist().values();
+                for (Artist a : b) {
+                    System.out.println(i + " - " + a.getName());
+                    i++;
+                }
                 break;
             }
         }
     }
 
-    public void delete(int pos,DaoType type) {
+    public void delete(UUID id, DaoType type) {
         switch (type) {
             case SONG: {
-                songs.deleteSongById(getUuid(pos,DaoType.SONG));
+                songs.deleteSongById(id);
                 break;
             }
             case ALBUM: {
-                albums.deleteAlbumById(getUuid(pos,DaoType.ALBUM));
+                albums.deleteAlbumById(id);
                 break;
             }
             case ARTIST: {
-                artists.deleteArtistById(getUuid(pos,DaoType.ARTIST));
+                artists.deleteArtistById(id);
                 break;
             }
         }
 
-    }
-
-    private UUID getUuid(int pos,DaoType type) {
-        switch (type) {
-            case SONG: {
-                return songs.getAllSongs().keySet().toArray(new UUID[0])[pos];
-            }
-            case ALBUM: {
-                return albums.getAllAlbum().keySet().toArray(new UUID[0])[pos];
-            }
-            case ARTIST: {
-                return artists.getAllArtist().keySet().toArray(new UUID[0])[pos];
-            }
-        }
-        return null;
     }
 }

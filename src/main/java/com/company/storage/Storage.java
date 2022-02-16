@@ -1,22 +1,20 @@
 package com.company.storage;
 
-import com.company.entityClass.Artist;
-import com.company.entityClass.EntityClassMarker;
+import com.company.entityclass.EntityClassMarker;
 
-import java.io.IOException;
+import java.util.Map;
+import java.util.UUID;
 
 public interface Storage {
+    Map<UUID,?> get(DaoType type);
+
     void add(EntityClassMarker obj, DaoType type);
 
     void printAll(DaoType type);
 
     void printName(DaoType type);
 
-    void delete(int pos,DaoType type);
+    void delete(UUID id, DaoType type);
 
-    void addIn(int pos, int posAlbum, DaoType type);
-
-    void load(String file,DaoType type) throws IOException;
-
-    void save(String file,DaoType type) throws IOException;
+    void addIn(UUID id, UUID id2, DaoType type);
 }

@@ -1,6 +1,6 @@
 package com.company.storage.dao.memory;
 
-import com.company.entityClass.Song;
+import com.company.entityclass.Song;
 import com.company.storage.dao.SongDao;
 
 import java.util.*;
@@ -15,14 +15,13 @@ public class InMemorySongDao implements SongDao {
 
     @Override
     public Map<UUID, Song> getAllSongs() {
-
         return songList;
     }
 
     @Override
     public void addSongs(Song... song) {
-        for (int i = 0; i < song.length; i++) {
-            songList.put(UUID.randomUUID(),song[i]);
+        for (Song value : song) {
+            songList.put(value.getId(), value);
         }
     }
 

@@ -1,10 +1,9 @@
 package com.company.storage.dao;
 
-import com.company.entityClass.Album;
-import com.company.entityClass.Artist;
-import com.company.entityClass.Song;
+import com.company.entityclass.Album;
+import com.company.entityclass.Artist;
 
-import java.util.List;
+import java.sql.SQLException;
 import java.util.Map;
 import java.util.UUID;
 
@@ -20,11 +19,5 @@ public interface ArtistDao {
 
     void renameArtistById(UUID id, String newName);
 
-    void addNewSongsCollections(UUID ArtistId, Album... albums);
-
-    void deleteAlbumById(UUID artistId, int albumPos);
-
-    Album  getAlbumById(UUID artistId, int albumPos);
-
-    List<Song> getAllSongInAlbumById(UUID artistId, int albumPos);
+    void addNewAlbum(UUID ArtistId, Album... albums);
 }

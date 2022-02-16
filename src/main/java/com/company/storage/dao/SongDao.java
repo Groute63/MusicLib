@@ -1,7 +1,8 @@
 package com.company.storage.dao;
 
-import com.company.entityClass.Song;
+import com.company.entityclass.Song;
 
+import java.sql.SQLException;
 import java.util.Map;
 import java.util.UUID;
 
@@ -16,4 +17,5 @@ public interface SongDao {
     void deleteSongById(UUID id);
 
     void renameSongById(UUID id, String newName);
+
 }

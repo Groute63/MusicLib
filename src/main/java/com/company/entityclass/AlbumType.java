@@ -1,4 +1,4 @@
-package com.company.entityClass;
+package com.company.entityclass;
 
 public enum AlbumType {
     PLAYLIST,ALBUM

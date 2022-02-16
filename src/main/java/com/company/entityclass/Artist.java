@@ -1,19 +1,42 @@
-package com.company.entityClass;
+package com.company.entityclass;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 public class Artist implements Serializable,EntityClassMarker {
     private String name;
     private List<Album> albums;
+    private UUID id;
 
+    public Artist(UUID id,String name) {
+        this.id = id;
+        this.name = name;
+        this.albums = new ArrayList<>();
+    }
 
     public Artist(String name, Album... albums) {
+        id = UUID.randomUUID();
         this.name = name;
         this.albums = new ArrayList<>(albums.length);
         Collections.addAll(this.albums, albums);
+    }
+
+    public Artist(UUID id,String name, Album... albums) {
+        this.id = id;
+        this.name = name;
+        this.albums = new ArrayList<>(albums.length);
+        Collections.addAll(this.albums, albums);
+    }
+
+    public void setId(UUID newId){
+        id=newId;
+    }
+
+    public UUID getId(){
+        return id;
     }
 
     public String toString() {

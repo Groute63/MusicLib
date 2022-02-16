@@ -1,8 +1,9 @@
 package com.company.storage.dao;
 
-import com.company.entityClass.Album;
-import com.company.entityClass.Song;
+import com.company.entityclass.Album;
+import com.company.entityclass.Song;
 
+import java.sql.SQLException;
 import java.util.Map;
 import java.util.UUID;
 
@@ -19,6 +20,4 @@ public interface AlbumDao {
     void renameAlbumById(UUID id, String newName);
 
     void addNewSongs(UUID albumId, Song... songs);
-
-    void deleteSongById(UUID albumId, int songPos);
 }

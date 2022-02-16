@@ -1,4 +1,4 @@
-package com.company.entityClass;
+package com.company.entityclass;
 
 import java.io.Serializable;
 

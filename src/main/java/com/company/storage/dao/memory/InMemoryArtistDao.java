@@ -1,12 +1,10 @@
 package com.company.storage.dao.memory;
 
-import com.company.entityClass.Album;
-import com.company.entityClass.Artist;
-import com.company.entityClass.Song;
+import com.company.entityclass.Album;
+import com.company.entityclass.Artist;
 import com.company.storage.dao.ArtistDao;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -22,7 +20,7 @@ public class InMemoryArtistDao implements ArtistDao {
     @Override
     public void addArtist(Artist... artists) {
         for (Artist artist : artists) {
-            artistMap.put(UUID.randomUUID(), artist);
+            artistMap.put(artist.getId(), artist);
         }
     }
 
@@ -42,23 +40,7 @@ public class InMemoryArtistDao implements ArtistDao {
     }
 
     @Override
-    public void addNewSongsCollections(UUID artistId, Album... albums) {
+    public void addNewAlbum(UUID artistId, Album... albums) {
         artistMap.get(artistId).addAlbums(albums);
     }
-
-    @Override
-    public Album getAlbumById(UUID artistId, int albumPos) {
-        return artistMap.get(artistId).getAlbums().get(albumPos);
-    }
-
-    @Override
-    public List<Song> getAllSongInAlbumById(UUID artistId, int albumPos) {
-       return artistMap.get(artistId).getAlbums().get(albumPos).getSongs();
-    }
-
-    @Override
-    public void deleteAlbumById(UUID artistId, int albumPos) {
-        artistMap.get(artistId).getAlbums().remove(albumPos);
-    }
-
 }

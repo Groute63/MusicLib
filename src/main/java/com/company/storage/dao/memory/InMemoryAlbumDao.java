@@ -1,7 +1,7 @@
 package com.company.storage.dao.memory;
 
-import com.company.entityClass.Album;
-import com.company.entityClass.Song;
+import com.company.entityclass.Album;
+import com.company.entityclass.Song;
 
 import com.company.storage.dao.AlbumDao;
 
@@ -19,7 +19,7 @@ public class InMemoryAlbumDao implements AlbumDao {
     @Override
     public void addAlbum(Album... albums) {
         for (Album album : albums) {
-            albumMap.put(UUID.randomUUID(), album);
+            albumMap.put(album.getId(), album);
         }
     }
 
@@ -42,11 +42,4 @@ public class InMemoryAlbumDao implements AlbumDao {
     public void addNewSongs(UUID albumId, Song... songs) {
         albumMap.get(albumId).addSongs(songs);
     }
-
-    @Override
-    public void deleteSongById(UUID albumId, int songPos) {
-        albumMap.get(albumId).getSongs().remove(songPos);
-    }
-
-
 }

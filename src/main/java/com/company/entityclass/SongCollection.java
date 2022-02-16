@@ -1,19 +1,43 @@
-package com.company.entityClass;
+package com.company.entityclass;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 public abstract class SongCollection implements EntityClassMarker {
     private String name;
     private List<Song> songs;
+    private UUID id;
 
     public abstract AlbumType getType();
 
+    public SongCollection(UUID id,String name) {
+        this.id = id;
+        this.name = name;
+        this.songs = new ArrayList<>();
+    }
+
     public SongCollection(String name, Song... songs) {
+        id = UUID.randomUUID();
         this.name = name;
         this.songs = new ArrayList<>(songs.length);
         Collections.addAll(this.songs, songs);
+    }
+
+    public SongCollection(UUID id,String name, Song... songs) {
+        this.id = id;
+        this.name = name;
+        this.songs = new ArrayList<>(songs.length);
+        Collections.addAll(this.songs, songs);
+    }
+
+    public void setId(UUID newId){
+        id=newId;
+    }
+
+    public UUID getId(){
+        return id;
     }
 
     public String toString() {
