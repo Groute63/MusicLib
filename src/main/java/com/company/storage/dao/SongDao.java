@@ -12,10 +12,10 @@ public interface SongDao {
 
     Map<UUID,Song> getAllSongs();
 
-    void addSongs(Song ... song);
+    void addSongs(Song ... song) throws SQLException;
 
-    void deleteSongById(UUID id);
+    void deleteSongById(UUID id) throws SQLException;
 
-    void renameSongById(UUID id, String newName);
+    void renameSongById(UUID id, String newName) throws SQLException;
 
 }

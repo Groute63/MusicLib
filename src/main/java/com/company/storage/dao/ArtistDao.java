@@ -11,13 +11,13 @@ public interface ArtistDao {
 
     Artist getArtistById(UUID id);
 
-    void addArtist(Artist... artists);
+    void addArtist(Artist... artists) throws SQLException;
 
     Map<UUID, Artist> getAllArtist();
 
-    void deleteArtistById(UUID id);
+    void deleteArtistById(UUID id) throws SQLException;
 
-    void renameArtistById(UUID id, String newName);
+    void renameArtistById(UUID id, String newName) throws SQLException;
 
-    void addNewAlbum(UUID ArtistId, Album... albums);
+    void addNewAlbum(UUID ArtistId, Album... albums) throws SQLException;
 }

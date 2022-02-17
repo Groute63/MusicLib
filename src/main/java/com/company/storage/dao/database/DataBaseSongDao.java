@@ -20,9 +20,11 @@ public class DataBaseSongDao implements SongDao {
     private final PreparedStatement deleteSongTag;
     private final PreparedStatement selectAllSong;
     private final PreparedStatement renameSong;
+    private final Connection con;
 
-    public DataBaseSongDao(Connection con){
+    public DataBaseSongDao(Connection con) {
         try {
+            this.con = con;
             insertSong = con.prepareStatement("INSERT INTO song VALUES(?,?,?)");
             insertTag = con.prepareStatement("INSERT INTO song_tag VALUES(?,?)");
             selectSong = con.prepareStatement("SELECT * FROM song where song_id = ?");
@@ -32,12 +34,12 @@ public class DataBaseSongDao implements SongDao {
             deleteSongTag = con.prepareStatement(" DELETE FROM song_tag WHERE song_id = ?");
             renameSong = con.prepareStatement("UPDATE song  SET song_name = ?  WHERE song_id = ?");
         } catch (SQLException throwable) {
-            throw new DBException(throwable.getMessage());
+            throw new DBException(throwable);
         }
     }
 
     @Override
-    public Song getSongById(UUID id){
+    public Song getSongById(UUID id) {
         List<String> tag = new ArrayList<>();
         ResultSet songSet;
         ResultSet tagSet;
@@ -56,12 +58,12 @@ public class DataBaseSongDao implements SongDao {
             }
             return song;
         } catch (SQLException throwable) {
-            throw new DBException(throwable.getMessage());
+            throw new DBException(throwable);
         }
     }
 
     @Override
-    public Map<UUID, Song> getAllSongs(){
+    public Map<UUID, Song> getAllSongs() {
         Map<UUID, Song> map = new HashMap<>();
         List<String> tag = new ArrayList<>();
         ResultSet songSet;
@@ -79,13 +81,13 @@ public class DataBaseSongDao implements SongDao {
             }
 
         } catch (SQLException throwable) {
-            throw new DBException(throwable.getMessage());
+            throw new DBException(throwable);
         }
         return map;
     }
 
     @Override
-    public void addSongs(Song... songs){
+    public void addSongs(Song... songs) throws SQLException {
         List<String> tag;
         try {
             for (Song song : songs) {
@@ -100,33 +102,39 @@ public class DataBaseSongDao implements SongDao {
                     insertTag.execute();
                 }
             }
+            con.commit();
         } catch (SQLException throwable) {
-            throw new DBException(throwable.getMessage());
+            con.rollback();
+            throw new DBException(throwable);
         }
 
     }
 
     @Override
-    public void deleteSongById(UUID id){
+    public void deleteSongById(UUID id) throws SQLException {
         try {
             deleteSongTag.setString(1, id.toString());
             deleteSongTag.execute();
             deleteSongById.setString(1, id.toString());
             deleteSongById.setString(1, id.toString());
             deleteSongById.execute();
+            con.commit();
         } catch (SQLException throwable) {
-            throw new DBException(throwable.getMessage());
+            con.rollback();
+            throw new DBException(throwable);
         }
     }
 
     @Override
-    public void renameSongById(UUID id, String newName){
+    public void renameSongById(UUID id, String newName) throws SQLException {
         try {
             renameSong.setString(1, newName);
             renameSong.setString(2, id.toString());
             renameSong.execute();
+            con.commit();
         } catch (SQLException throwable) {
-            throw new DBException(throwable.getMessage());
+            con.rollback();
+            throw new DBException(throwable);
         }
     }
 }

@@ -34,9 +34,11 @@ public class DataBaseArtistDao implements ArtistDao {
     private final PreparedStatement deleteSongToAlbum;
     private final PreparedStatement deleteAlbumToArtist;
     private final PreparedStatement renameArtist;
+    private final Connection con;
 
-    public DataBaseArtistDao(Connection con) throws SQLException {
+    public DataBaseArtistDao(Connection con){
         try {
+            this.con = con;
             insertArtist = con.prepareStatement("INSERT INTO artist VALUES(?,?)");
             insertAlbum = con.prepareStatement("INSERT INTO album VALUES(?,?)");
             insertAlbumToArtist = con.prepareStatement("INSERT INTO album_to_artist VALUES(?,?)");
@@ -58,8 +60,7 @@ public class DataBaseArtistDao implements ArtistDao {
             deleteSongTag = con.prepareStatement(" DELETE FROM song_tag WHERE song_id = ?");
             renameArtist = con.prepareStatement("UPDATE artist  SET artist_name = ?  WHERE artist_id = ?");
         } catch (SQLException throwable) {
-            throwable.printStackTrace();
-            throw throwable;
+            throw new DBException(throwable);
         }
     }
 
@@ -107,12 +108,12 @@ public class DataBaseArtistDao implements ArtistDao {
             }
             return art;
         } catch (SQLException throwable) {
-            throw new RuntimeException(throwable);
+            throw new DBException(throwable);
         }
     }
 
     @Override
-    public void addArtist(Artist... artists){
+    public void addArtist(Artist... artists) throws SQLException {
         List<Album> albums;
         List<Song> songs;
         List<String> tag;
@@ -146,10 +147,11 @@ public class DataBaseArtistDao implements ArtistDao {
                         }
                     }
                 }
+                con.commit();
             }
-
         } catch (SQLException throwable) {
-            throw new DBException(throwable.getMessage());
+            con.rollback();
+            throw new DBException(throwable);
         }
     }
 
@@ -197,13 +199,13 @@ public class DataBaseArtistDao implements ArtistDao {
                 }
             }
         } catch (SQLException throwable) {
-            throw new DBException(throwable.getMessage());
+            throw new DBException(throwable);
         }
         return map;
     }
 
     @Override
-    public void deleteArtistById(UUID id){
+    public void deleteArtistById(UUID id) throws SQLException {
         try {
             selectAlbumToArtist.setString(1, id.toString());
             ResultSet albumIdSet = selectAlbumToArtist.executeQuery();
@@ -225,34 +227,38 @@ public class DataBaseArtistDao implements ArtistDao {
                     deleteSongById.execute();
                 }
             }
-
-
+            con.commit();
         } catch (SQLException throwable) {
-            throw new DBException(throwable.getMessage());
+            con.rollback();
+            throw new DBException(throwable);
         }
     }
 
     @Override
-    public void renameArtistById(UUID id, String newName){
+    public void renameArtistById(UUID id, String newName) throws SQLException {
         try {
             renameArtist.setString(1, newName);
             renameArtist.setString(2, id.toString());
             renameArtist.execute();
+            con.commit();
         } catch (SQLException throwable) {
-            throw new DBException(throwable.getMessage());
+            con.rollback();
+            throw new DBException(throwable);
         }
     }
 
     @Override
-    public void addNewAlbum(UUID artistId, Album... albums){
+    public void addNewAlbum(UUID artistId, Album... albums) throws SQLException {
         try {
             for (Album album : albums) {
                 insertAlbumToArtist.setString(1, album.getId().toString());
                 insertAlbumToArtist.setString(2, artistId.toString());
                 insertAlbumToArtist.execute();
             }
+            con.commit();
         } catch (SQLException throwable) {
-            throw new DBException(throwable.getMessage());
+            con.rollback();
+            throw new DBException(throwable);
         }
     }
 }

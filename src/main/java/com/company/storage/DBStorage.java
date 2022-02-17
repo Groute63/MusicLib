@@ -16,7 +16,7 @@ import java.util.*;
 
 public class DBStorage implements Storage, AutoCloseable {
 
-    private String dbUrl = "jdbc:postgresql://localhost:5432/MusicLib";
+    private String dbUrl = "jdbc:postgresql://localhost:5432/MUSICLIB3";
     private String dbUserName = "postgres";
     private String dbPassword = "092327asd";
     private Connection con = null;
@@ -47,7 +47,7 @@ public class DBStorage implements Storage, AutoCloseable {
     }
 
     private void init() throws SQLException {
-       selectLogin = con.prepareStatement("SELECT login FROM users  WHERE login = ? and password = ?");
+        selectLogin = con.prepareStatement("SELECT acc FROM users  WHERE login = ? and password = ?");
     }
 
     public void getConnection() throws SQLException {
@@ -55,18 +55,19 @@ public class DBStorage implements Storage, AutoCloseable {
         songs = new DataBaseSongDao(con);
         albums = new DataBaseAlbumDao(con);
         artists = new DataBaseArtistDao(con);
+        con.setAutoCommit(false);
     }
 
-    public boolean login(String login, String password){
+    public int login(String login, String password) {
         try {
-            selectLogin.setString(1,login);
-            selectLogin.setString(2,password);
+            selectLogin.setString(1, login);
+            selectLogin.setString(2, password);
             ResultSet res = selectLogin.executeQuery();
-            if(res.next()) return true;
+            if (res.next()) return res.getInt(1);
         } catch (SQLException throwable) {
             throwable.printStackTrace();
         }
-        return false;
+        return 0;
     }
 
     @Override
@@ -88,19 +89,23 @@ public class DBStorage implements Storage, AutoCloseable {
 
     @Override
     public void add(EntityClassMarker obj, DaoType type) {
-        switch (type) {
-            case ARTIST: {
-                artists.addArtist((Artist) obj);
-                break;
+        try {
+            switch (type) {
+                case ARTIST: {
+                    artists.addArtist((Artist) obj);
+                    break;
+                }
+                case ALBUM: {
+                    albums.addAlbum((Album) obj);
+                    break;
+                }
+                case SONG: {
+                    songs.addSongs((Song) obj);
+                    break;
+                }
             }
-            case ALBUM: {
-                albums.addAlbum((Album) obj);
-                break;
-            }
-            case SONG: {
-                songs.addSongs((Song) obj);
-                break;
-            }
+        } catch (SQLException throwable) {
+            throwable.printStackTrace();
         }
     }
 
@@ -162,33 +167,41 @@ public class DBStorage implements Storage, AutoCloseable {
 
     @Override
     public void delete(UUID id, DaoType type) {
-        switch (type) {
-            case SONG: {
-                songs.deleteSongById(id);
-                break;
+        try {
+            switch (type) {
+                case SONG: {
+                    songs.deleteSongById(id);
+                    break;
+                }
+                case ALBUM: {
+                    albums.deleteAlbumById(id);
+                    break;
+                }
+                case ARTIST: {
+                    artists.deleteArtistById(id);
+                    break;
+                }
             }
-            case ALBUM: {
-                albums.deleteAlbumById(id);
-                break;
-            }
-            case ARTIST: {
-                artists.deleteArtistById(id);
-                break;
-            }
+        } catch (SQLException throwable) {
+            throwable.printStackTrace();
         }
     }
 
     @Override
     public void addIn(UUID id, UUID id2, DaoType type) {
-        switch (type) {
-            case ALBUM: {
-                albums.getAlbumById(id).addSongs(songs.getSongById(id2));
-                break;
+        try {
+            switch (type) {
+                case ALBUM: {
+                    albums.getAlbumById(id).addSongs(songs.getSongById(id2));
+                    break;
+                }
+                case ARTIST: {
+                    artists.addNewAlbum(id, albums.getAlbumById(id2));
+                    break;
+                }
             }
-            case ARTIST: {
-                artists.addNewAlbum(id, albums.getAlbumById(id2));
-                break;
-            }
+        } catch (SQLException throwable) {
+            throwable.printStackTrace();
         }
     }
 

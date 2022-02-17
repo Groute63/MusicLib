@@ -27,9 +27,11 @@ public class DataBaseAlbumDao implements AlbumDao {
     private final PreparedStatement deleteSongToAlbum;
     private final PreparedStatement selectAllAlbum;
     private final PreparedStatement renameAlbum;
+    private final Connection con;
 
     public DataBaseAlbumDao(Connection con){
         try {
+            this.con = con;
             insertAlbum = con.prepareStatement("INSERT INTO album VALUES(?,?)");
             insertSong = con.prepareStatement("INSERT INTO song VALUES(?,?,?)");
             insertSongToAlbum = con.prepareStatement("INSERT INTO song_to_album VALUES(?,?)");
@@ -45,7 +47,7 @@ public class DataBaseAlbumDao implements AlbumDao {
             deleteSongTag = con.prepareStatement(" DELETE FROM song_tag WHERE song_id = ?");
             renameAlbum = con.prepareStatement("UPDATE album  SET album_name = ?  WHERE album_id = ?");
         } catch (SQLException throwable) {
-            throw new DBException(throwable.getMessage());
+            throw new DBException(throwable);
         }
     }
 
@@ -81,12 +83,12 @@ public class DataBaseAlbumDao implements AlbumDao {
             }
             return alb;
         } catch (SQLException throwable) {
-            throw new DBException(throwable.getMessage());
+            throw new DBException(throwable);
         }
     }
 
     @Override
-    public void addAlbum(Album... albums){
+    public void addAlbum(Album... albums) throws SQLException {
         List<Song> songs;
         List<String> tag;
         try {
@@ -111,8 +113,10 @@ public class DataBaseAlbumDao implements AlbumDao {
                     }
                 }
             }
+            con.commit();
         } catch (SQLException throwable) {
-            throw new DBException(throwable.getMessage());
+            con.rollback();
+            throw new DBException(throwable);
         }
     }
 
@@ -148,12 +152,12 @@ public class DataBaseAlbumDao implements AlbumDao {
             }
             return map;
         } catch (SQLException throwable) {
-            throw new DBException(throwable.getMessage());
+            throw new DBException(throwable);
         }
     }
 
     @Override
-    public void deleteAlbumById(UUID id){
+    public void deleteAlbumById(UUID id) throws SQLException {
         try {
             selectSongToAlbum.setString(1, id.toString());
             ResultSet songIdSet = selectSongToAlbum.executeQuery();
@@ -167,32 +171,38 @@ public class DataBaseAlbumDao implements AlbumDao {
                 deleteSongById.setString(1, songIdSet.getString(1));
                 deleteSongById.execute();
             }
+            con.commit();
         } catch (SQLException throwable) {
-            throw new DBException(throwable.getMessage());
+            con.rollback();
+            throw new DBException(throwable);
         }
     }
 
     @Override
-    public void renameAlbumById(UUID id, String newName){
+    public void renameAlbumById(UUID id, String newName) throws SQLException {
         try {
             renameAlbum.setString(1, newName);
             renameAlbum.setString(2, id.toString());
             renameAlbum.execute();
+            con.commit();
         } catch (SQLException throwable) {
-            throw new DBException(throwable.getMessage());
+            con.rollback();
+            throw new DBException(throwable);
         }
     }
 
     @Override
-    public void addNewSongs(UUID albumId, Song... songs){
+    public void addNewSongs(UUID albumId, Song... songs) throws SQLException {
         try {
             for (Song song : songs) {
                 insertSongToAlbum.setString(1, song.getId().toString());
                 insertSongToAlbum.setString(2, albumId.toString());
                 insertSongToAlbum.execute();
             }
+            con.commit();
         } catch (SQLException throwable) {
-            throw new DBException(throwable.getMessage());
+            con.rollback();
+            throw new DBException(throwable);
         }
     }
 }

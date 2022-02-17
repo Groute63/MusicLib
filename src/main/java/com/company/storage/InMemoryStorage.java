@@ -4,6 +4,7 @@ import com.company.entityclass.Album;
 import com.company.entityclass.Artist;
 import com.company.entityclass.EntityClassMarker;
 import com.company.entityclass.Song;
+import com.company.exception.DBException;
 import com.company.storage.dao.ArtistDao;
 import com.company.storage.dao.AlbumDao;
 import com.company.storage.dao.SongDao;
@@ -12,18 +13,15 @@ import com.company.storage.dao.memory.InMemoryAlbumDao;
 import com.company.storage.dao.memory.InMemorySongDao;
 import com.google.gson.*;
 
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.*;
 
 public class InMemoryStorage implements Storage {
     private final SongDao songs = new InMemorySongDao();
     private final AlbumDao albums = new InMemoryAlbumDao();
     private final ArtistDao artists = new InMemoryArtistDao();
-    private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    //private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-    public void save(String file, DaoType type, UUID... id) throws IOException {
+    /*public void save(String file, DaoType type, UUID... id) throws IOException {
         PrintWriter printWriter = new PrintWriter(file);
         List<EntityClassMarker> a = new ArrayList<>();
         switch (type) {
@@ -49,9 +47,9 @@ public class InMemoryStorage implements Storage {
         String json = gson.toJson(a);
         printWriter.println(json);
         printWriter.flush();
-    }
+    }*/
 
-    public void load(String file, DaoType type) throws IOException {
+   /* public void load(String file, DaoType type) throws IOException {
         List<String> arr = Files.readAllLines(Paths.get(file));
         StringBuilder s = new StringBuilder();
         for (String value : arr)
@@ -82,7 +80,7 @@ public class InMemoryStorage implements Storage {
                 break;
             }
         }
-    }
+    }*/
 
     public Map<UUID, ?> get(DaoType type) {
         switch (type) {
@@ -100,19 +98,23 @@ public class InMemoryStorage implements Storage {
     }
 
     public void add(EntityClassMarker obj, DaoType type) {
-        switch (type) {
-            case SONG: {
-                songs.addSongs((Song) obj);
-                break;
+        try {
+            switch (type) {
+                case SONG: {
+                    songs.addSongs((Song) obj);
+                    break;
+                }
+                case ALBUM: {
+                    albums.addAlbum((Album) obj);
+                    break;
+                }
+                case ARTIST: {
+                    artists.addArtist((Artist) obj);
+                    break;
+                }
             }
-            case ALBUM: {
-                albums.addAlbum((Album) obj);
-                break;
-            }
-            case ARTIST: {
-                artists.addArtist((Artist) obj);
-                break;
-            }
+        } catch (Exception e) {
+            throw new DBException(e);
         }
     }
 
@@ -183,20 +185,24 @@ public class InMemoryStorage implements Storage {
     }
 
     public void delete(UUID id, DaoType type) {
-        switch (type) {
-            case SONG: {
-                songs.deleteSongById(id);
-                break;
-            }
-            case ALBUM: {
-                albums.deleteAlbumById(id);
-                break;
-            }
-            case ARTIST: {
-                artists.deleteArtistById(id);
-                break;
+        try {
+            switch (type) {
+                case SONG: {
+                    songs.deleteSongById(id);
+                    break;
+                }
+                case ALBUM: {
+                    albums.deleteAlbumById(id);
+                    break;
+                }
+                case ARTIST: {
+                    artists.deleteArtistById(id);
+                    break;
+                }
             }
         }
-
+        catch (Exception e) {
+            throw new DBException(e);
+        }
     }
 }
