@@ -10,7 +10,10 @@ import com.company.storage.dao.SongDao;
 import com.company.storage.dao.database.DataBaseAlbumDao;
 import com.company.storage.dao.database.DataBaseArtistDao;
 import com.company.storage.dao.database.DataBaseSongDao;
+import org.apache.commons.codec.binary.Hex;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.*;
 import java.util.*;
 
@@ -60,14 +63,21 @@ public class DBStorage implements Storage, AutoCloseable {
 
     public int login(String login, String password) {
         try {
+            password = getHash(password);
             selectLogin.setString(1, login);
             selectLogin.setString(2, password);
             ResultSet res = selectLogin.executeQuery();
             if (res.next()) return res.getInt(1);
-        } catch (SQLException throwable) {
+        } catch (SQLException | NoSuchAlgorithmException throwable) {
             throwable.printStackTrace();
         }
         return 0;
+    }
+
+    public static String getHash(String password) throws NoSuchAlgorithmException {
+        MessageDigest messageDigest = MessageDigest.getInstance("MD5");
+        messageDigest.update(password.getBytes());
+        return String.valueOf(Hex.encodeHex(messageDigest.digest()));
     }
 
     @Override
